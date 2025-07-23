@@ -20,9 +20,11 @@ export default function AddPhrase({ username, socket, balance, setBalance, entri
             }
 
             if (data.type === "new_entry") {
-                setSuccess("Your bet was placed successfully!");
-                setInput("");
-                setAmount("");
+                if (data.entry.author_id === username) {
+                    setSuccess("Your bet was placed successfully!");
+                    setInput("");
+                    setAmount("");
+                }
             }
         };
 
@@ -112,7 +114,8 @@ export default function AddPhrase({ username, socket, balance, setBalance, entri
             </button>
 
             <div className={`mt-4 font-sans text-[14px] text-center min-h-[20px] ${error ? 'text-red-600' : success ? 'text-green-600' : 'text-gray-400'}`}>
-                {error || success || hasBetThisRound ? 'You have already placed a bet this round.' : ''}
+                {error || success}
+                {hasBetThisRound && 'You have already placed a bet this round.'}
             </div>
 
         </div>
