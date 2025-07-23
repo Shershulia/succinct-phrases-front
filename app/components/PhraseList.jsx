@@ -38,7 +38,7 @@ export default function PhraseList({ socket, entries, setEntries }) {
                         className="bg-pink-50 border-2 border-pink-200 p-3 rounded-lg shadow-sm flex items-center gap-3"
                     >
                         <img src={`https://unavatar.io/x/${entry.author_id}`} alt="User Avatar" className="w-10 h-10 rounded-full" />
-                        <div className="flex flex-col items-center justify-center">
+                        <div className="flex flex-col justify-center">
                             <div className="text-pink-900 font-semibold">{entry.author_id}</div>
                             <div className="text-pink-700 italic mt-1">"{entry.text}"</div>
                             <div className="text-pink-600 mt-1">Bet: {entry.amount}</div>
