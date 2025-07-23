@@ -1,103 +1,98 @@
-import Image from "next/image";
+'use client';
 
+import { useState, useEffect } from "react";
+import LoginModal from "@/app/components/LoginModal";
+import AddPhrase from "@/app/components/AddPhrase";
+import PhraseList from "@/app/components/PhraseList";
+import toast from 'react-hot-toast';
+import GameStatus from "@/app/components/GameStatus";
+import ClickerWithParticles from "@/app/components/ClickerWithParticles";
+import LastWinner from "@/app/components/LastWinner";
+import Header from "@/app/components/HeaderComponent";
+import Win95Window from "@/app/components/Win95Window";
+import CloudCanvas from "@/app/components/CloudCanvas";
 export default function Home() {
-  return (
-    <div className="font-sans grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="font-mono list-inside list-decimal text-sm/6 text-center sm:text-left">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] font-mono font-semibold px-1 py-0.5 rounded">
-              app/page.js
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
+  const [username, setUsername] = useState(null);
+  const [socket, setSocket] = useState(null);
+  const [balance, setBalance] = useState(0);
+  const [lastWinner, setLastWinner] = useState(null);
+  const [entries, setEntries] = useState([]);
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
-        </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
-    </div>
+  // Load username from localStorage if exists
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const stored = localStorage.getItem('username');
+      if (stored) {
+        setUsername(stored);
+      }
+    }
+  }, []);
+
+  // Create WebSocket connection
+  useEffect(() => {
+    if (!username) return;
+
+    const ws = new WebSocket("ws://localhost:8000/ws"); // change to prod URL if needed
+    setSocket(ws);
+
+    ws.onopen = () => {
+      console.log("WebSocket connected");
+    };
+
+    ws.onerror = () => {
+      toast.error("WebSocket connection failed");
+    };
+
+    ws.onclose = () => {
+      console.log("WebSocket disconnected");
+    };
+
+    return () => {
+      ws.close();
+    };
+  }, [username]);
+
+  const handleModalSubmit = (name) => {
+    setUsername(name);
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('username', name);
+    }
+  };
+
+  const handleWinnerUpdate = (winner) => {
+    setLastWinner(winner);
+  };
+
+  return (
+      <div className="flex flex-col items-center min-h-screen p-8">
+        <CloudCanvas />
+
+        <Header balance={balance} />
+        {!username && <LoginModal onSubmit={handleModalSubmit} />}
+        {username && socket && (
+          <div className="flex w-full items-start gap-16 p-4">
+            <div className="flex flex-col items-center justify-center gap-8 flex-1">
+              <Win95Window title="last_winner.exe" icon="" width={600}>
+                <LastWinner winner={lastWinner} />
+              </Win95Window>
+              <Win95Window title="add_phrase.exe" icon="" width={600}>
+                <AddPhrase username={username} socket={socket} balance={balance} setBalance={setBalance} entries={entries} setEntries={setEntries} />
+              </Win95Window>
+              <div className="flex flex-col items-center justify-center flex-1">
+                <Win95Window title="clicker.exe" icon="" width={600}>
+                  <p style={{ fontFamily: 'var(--font-my)' }} className="text-pink-800 text-[50px] z-20 text-center">CRACK ME</p>
+                  <ClickerWithParticles onBalanceChange={setBalance} initial={balance} />
+                </Win95Window>
+              </div>
+            </div>
+            <div className="flex flex-col items-center justify-center gap-8 flex-1">
+              <GameStatus socket={socket} onWinnerUpdate={handleWinnerUpdate} />
+              <Win95Window title="phrase_list.exe" icon="" width={"100%"}>
+                <PhraseList socket={socket} entries={entries} setEntries={setEntries} />
+              </Win95Window>
+            </div>
+          </div>
+        )}
+      </div>
   );
 }
