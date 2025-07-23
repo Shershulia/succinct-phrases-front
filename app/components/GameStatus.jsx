@@ -164,7 +164,7 @@ export default function GameStatus({ socket, onWinnerUpdate }) {
                 />
                 <div className="text-xs font-semibold truncate w-[90px]">{entry.author_id}</div>
                 <div className="text-[11px] italic truncate w-[90px]">"{entry.text}"</div>
-                <div className="text-[10px] text-pink-600 overflow-hidden">@{entry.author_id}</div>
+                <div className="text-[10px] text-pink-600 overflow-hidden">@{entry.author_id  }</div>
               </div>
             ))}
           </div>
