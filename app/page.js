@@ -32,7 +32,7 @@ export default function Home() {
   useEffect(() => {
     if (!username) return;
 
-    const ws = new WebSocket("wss://fastapi-production-0e3e.up.railway.app/ws");
+    const ws = new WebSocket("wss://succphrasesbackend-production.up.railway.app/ws");
     setSocket(ws);
 
     ws.onopen = () => {
